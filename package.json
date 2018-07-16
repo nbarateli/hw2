@@ -8,7 +8,8 @@
 		"npm": "1.2.x"
 	},
 	"dependencies": {
+      "ejs": "0.8.x",
 		"express": "3.2.x",
-		"ejs": "0.8.x"
+      "socket.io": "^2.1.1"
 	}
 }
