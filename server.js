@@ -6,7 +6,17 @@ var ejs = require("ejs");
 
 // Create server
 var app = express();
+var http = require('http').Server(app);
+const io = require('socket.io')(http);
 
+io.on('connection', socket => {
+    socket.on('move', function (msg) {
+        msg = JSON.parse(msg)
+        console.log(msg);
+        io.emit('move', JSON.stringify(msg
+        ))
+    })
+})
 // Print HTTP requests to console
 app.use(express.logger());
 
@@ -30,6 +40,7 @@ var turn;
 var resetGame = function () {
     board = [["", "", ""], ["", "", ""], ["", "", ""]];
     turn = "x";
+    // console.log(JSON.stringify(board))
 };
 
 // Given a board, return true if the game has ended and false otherwise
@@ -120,18 +131,22 @@ function valid(x, y, player) {
         && inRange(y, 0, board.length - 1) && board[x][y] === '' && turn === player;
 }
 
+function move(x, y, player) {
+    if (valid(x, y, player)) {
+        board[x][y] = player;
+        turn = gameEnded(board) ? "" : player === 'x' ? 'o' : 'x';
+        return true
+    }
+    return false
+
+
+}
+
 // HTTP GET endpoint that makes a player move
 app.get("/move", function (req, res) {
     // TODO: Implement this
     let x = req.query.row, y = req.query.col, player = req.query.player;
-    if (valid(x, y, player)) {
-        board[x][y] = player
-        turn = gameEnded(board) ? "" : player === 'x' ? 'o' : 'x';
-        res.send(JSON.stringify(true));
-    } else {
-        res.send(JSON.stringify(false));
-    }
-
+    res.send(JSON.stringify(move(x, y, player)))
     res.end();
 });
 
@@ -140,5 +155,7 @@ resetGame();
 
 // Listen for new HTTP connections at the given port number
 var port = 80;
-app.listen(port);
-console.log("Listening for new connections on http://localhost:" + port + "/");
+//app.listen(port);
+http.listen(80, () => resetGame());
+
+// console.log("Listening for new connections on http://localhost:" + port + "/");
