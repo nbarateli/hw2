@@ -19,6 +19,10 @@ io.on('connection', socket => {
         else
             console.log("OEEEEEEEEEEe")
     })
+    socket.on('new_game', () => {
+        resetGame();
+        io.emit('new_game');
+    })
 })
 // Print HTTP requests to console
 app.use(express.logger());

@@ -40,6 +40,11 @@ gameUI.callback = callback;
 
 // Initialize game
 init()
+socket.on('new_game', () => {
+    console.log('newgaaame')
+    gameUI.reset();
+    init();
+})
 socket.on('move', msg => {
         console.log(msg);
         msg = JSON.parse(msg)
@@ -55,3 +60,8 @@ socket.on('move', msg => {
         }
     }
 )
+gameUI.newGame = event => {
+    event.preventDefault();
+    console.log(event);
+    socket.emit('new_game');
+}
