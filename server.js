@@ -12,9 +12,12 @@ const io = require('socket.io')(http);
 io.on('connection', socket => {
     socket.on('move', function (msg) {
         msg = JSON.parse(msg)
-        console.log(msg);
-        io.emit('move', JSON.stringify(msg
-        ))
+        console.log(JSON.stringify(msg));
+        if (move(msg.row, msg.col, msg.player))
+            io.emit('move', JSON.stringify(msg
+            ))
+        else
+            console.log("OEEEEEEEEEEe")
     })
 })
 // Print HTTP requests to console
@@ -33,14 +36,15 @@ app.set("view engine", "ejs");
 app.set("views", __dirname + "/views");
 
 // Game state variables
-var board;
+const board = [["", "", ""], ["", "", ""], ["", "", ""]];
 var turn;
 
 // Reset the game
 var resetGame = function () {
-    board = [["", "", ""], ["", "", ""], ["", "", ""]];
+    for (i in board)
+        for (j in board[i]) board[i][j] = "";
     turn = "x";
-    // console.log(JSON.stringify(board))
+    console.error(new Error().stack)
 };
 
 // Given a board, return true if the game has ended and false otherwise
@@ -111,6 +115,7 @@ app.get("/newgame", function (req, res) {
 
 // HTTP GET endpoint that gets the board
 app.get("/board", function (req, res) {
+    console.log(board)
     res.send(JSON.stringify(board));
     res.end();
 });
@@ -135,6 +140,7 @@ function move(x, y, player) {
     if (valid(x, y, player)) {
         board[x][y] = player;
         turn = gameEnded(board) ? "" : player === 'x' ? 'o' : 'x';
+        console.log(JSON.stringify(board))
         return true
     }
     return false
@@ -156,6 +162,6 @@ resetGame();
 // Listen for new HTTP connections at the given port number
 var port = 80;
 //app.listen(port);
-http.listen(80, () => resetGame());
+http.listen(80);
 
 // console.log("Listening for new connections on http://localhost:" + port + "/");
