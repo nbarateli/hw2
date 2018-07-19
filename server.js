@@ -11,19 +11,20 @@ const io = require('socket.io')(http);
 
 io.on('connection', socket => {
     socket.on('move', function (msg) {
-        msg = JSON.parse(msg)
+        msg = JSON.parse(msg);
         console.log(JSON.stringify(msg));
-        if (move(msg.row, msg.col, msg.player))
+        if (move(msg.row, msg.col, msg.player)) {
             io.emit('move', JSON.stringify(msg
-            ))
+            ));
+        }
         else
             console.log("OEEEEEEEEEEe")
-    })
+    });
     socket.on('new_game', () => {
         resetGame();
         io.emit('new_game');
     })
-})
+});
 // Print HTTP requests to console
 app.use(express.logger());
 
@@ -44,12 +45,13 @@ const board = [["", "", ""], ["", "", ""], ["", "", ""]];
 var turn;
 
 // Reset the game
-var resetGame = function () {
-    for (i in board)
-        for (j in board[i]) board[i][j] = "";
+function resetGame() {
+    for (let i = 0; i < board.length; i++)
+        for (let j = 0; j < board[i].length; j++) {
+            board[i][j] = "";
+        }
     turn = "x";
-    console.error(new Error().stack)
-};
+}
 
 // Given a board, return true if the game has ended and false otherwise
 var gameEnded = function (board) {
@@ -85,7 +87,7 @@ var gameEnded = function (board) {
         }
     }
     return true;
-}
+};
 
 // Client page for Player X
 app.get("/playerx", function (req, res) {
@@ -119,7 +121,6 @@ app.get("/newgame", function (req, res) {
 
 // HTTP GET endpoint that gets the board
 app.get("/board", function (req, res) {
-    console.log(board)
     res.send(JSON.stringify(board));
     res.end();
 });
@@ -144,7 +145,6 @@ function move(x, y, player) {
     if (valid(x, y, player)) {
         board[x][y] = player;
         turn = gameEnded(board) ? "" : player === 'x' ? 'o' : 'x';
-        console.log(JSON.stringify(board))
         return true
     }
     return false
@@ -156,7 +156,7 @@ function move(x, y, player) {
 app.get("/move", function (req, res) {
     // TODO: Implement this
     let x = req.query.row, y = req.query.col, player = req.query.player;
-    res.send(JSON.stringify(move(x, y, player)))
+    res.send(JSON.stringify(move(x, y, player)));
     res.end();
 });
 

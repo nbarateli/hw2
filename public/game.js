@@ -7,14 +7,22 @@ var gameUI = new GameUI(".container", player);
 async function init() {
     let resp = await fetch('/turn');
     let data = await resp.json();
+
     (msg => {
-        gameUI.setMessage("It is player " + msg.toUpperCase() + "'s turn.")
-        if (msg === player) gameUI.waitForMove();
+        msg = msg.toUpperCase();
+        gameUI.setMessage(
+            msg === 'X' || msg === 'O' ?
+                "It is player " + msg.toUpperCase() + "'s turn."
+                :
+                "The game has ended."
+        );
+        if (msg === player) {
+            gameUI.waitForMove();
+        }
     })(data);
     resp = await fetch('/board');
     data = await resp.json();
     (data => {
-        console.log(data)
         gameUI.setBoard(data)
     })(data)
 }
@@ -23,13 +31,13 @@ async function init() {
 // TODO: Reimplement this function to support multiplayer
 var callback = function (row, col, _player) {
     if (!gameUI.ended) {
-        if (gameUI.player !== player) gameUI.disable()
+        if (gameUI.player !== player) gameUI.disable();
         if (gameUI.player == "x") gameUI.player = "o";
         else if (gameUI.player == "o") gameUI.player = "x";
-        gameUI.setMessage("It is player " + gameUI.player.toUpperCase() + "'s turn.")
+        gameUI.setMessage("It is player " + gameUI.player.toUpperCase() + "'s turn.");
         socket.emit('move', JSON.stringify({row: row, col: col, player: _player}))
     } else {
-        socket.emit('move', JSON.stringify({row: row, col: col, player: _player}))
+        socket.emit('move', JSON.stringify({row: row, col: col, player: _player}));
         gameUI.setMessage("Game has ended.")
     }
 
@@ -39,29 +47,25 @@ var callback = function (row, col, _player) {
 gameUI.callback = callback;
 
 // Initialize game
-init()
+init();
 socket.on('new_game', () => {
-    console.log('newgaaame')
     gameUI.reset();
     init();
-})
+});
 socket.on('move', msg => {
-        console.log(msg);
-        msg = JSON.parse(msg)
-        gameUI.setSquare(msg.row, msg.col, msg.player)
+
+    msg = JSON.parse(msg);
+    gameUI.setSquare(msg.row, msg.col, msg.player);
         if (gameUI.checkEnded()) {
-            gameUI.setMessage("Game has ended.")
-        }
-        if (msg.player !== player) {
+            gameUI.setMessage("Game has ended. Player " + gameUI.winner + " won.")
+        } else if (msg.player !== player) {
             gameUI.player = player;
-            console.log(player)
             gameUI.setMessage("It is your turn.");//player " + gameUI.player.toUpperCase() + "'s turn.");
             gameUI.waitForMove();
         }
     }
-)
+);
 gameUI.newGame = event => {
     event.preventDefault();
-    console.log(event);
     socket.emit('new_game');
-}
+};
