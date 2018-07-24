@@ -1,9 +1,9 @@
-const socket = io('http://localhost/');
+//create a socket
+const socket = io('/');
 // Create game interface
 var gameUI = new GameUI(".container", player);
 
 // Initialize game
-// TODO: Reimplement this function to support multiplayer
 async function init() {
     let resp = await fetch('/turn');
     let data = await resp.json();
@@ -16,7 +16,7 @@ async function init() {
                 :
                 "The game has ended."
         );
-        if (msg === player) {
+        if (msg === player.toUpperCase()) {
             gameUI.waitForMove();
         }
     })(data);
@@ -28,7 +28,6 @@ async function init() {
 }
 
 // Callback function for when the user makes a move
-// TODO: Reimplement this function to support multiplayer
 var callback = function (row, col, _player) {
     if (!gameUI.ended) {
         if (gameUI.player !== player) gameUI.disable();
